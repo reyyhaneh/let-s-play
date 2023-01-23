@@ -5,6 +5,7 @@ from nn import NeuralNetwork
 from config import CONFIG
 
 
+
 class Player():
 
     def __init__(self, mode, control=False):
@@ -96,9 +97,32 @@ class Player():
         elif mode == 'thrust':
             layer_sizes = [6, 20, 1]
         return layer_sizes
+    #this function creates the first layer of ANN
+    def make_input_vector(mode, box_lists, agent_position, velocity):
+        input = []
 
-    
+        if len(box_lists) == 0:
+            input.append(agent_position[0], agent_position[1], agent_position[0], agent_position[1], velocity)
+        else:
+            input.append(mode, agent_position[0], agent_position[1], box_lists[0].x, box_lists[0].gap_mid, velocity)
+        
+        input = np.array(input)
+        input_normal = np.linalg.norm(input)
+        return (input/input_normal)
+
+
+
     def think(self, mode, box_lists, agent_position, velocity):
+        
+        if mode == 'helicopter':
+            input_vector = self.make_input_vector(1, box_lists, agent_position, velocity)
+        elif mode == 'gravity':
+            input_vector = self.make_input_vector(2, box_lists, agent_position, velocity)
+        elif mode == 'thrust':
+            input_vector = self.make_input_vector(3, box_lists, agent_position, velocity)
+        
+        direction = self.nn.forward(input_vector)
+
 
         # TODO
         # mode example: 'helicopter'
